@@ -56,24 +56,51 @@ perl tools/settings_crypt.pl DUMMYS.lua DUMMYS.DAT                       # rechi
 
 Opération symétrique. Voir [formats/settings-dat.md](formats/settings-dat.md).
 
-## `plmstr.pl` — inspecter un PLM
+## `plm.pl` — lire et modifier un PLM
+
+Afficher une scène :
 
 ```
-perl tools/plmstr.pl chemin/vers/FICHIER.PLM
+perl tools/plm.pl tree FICHIER.PLM            # arbre des entités et leurs composants
+perl tools/plm.pl dump FICHIER.PLM            # idem avec toutes les propriétés
+perl tools/plm.pl dump FICHIER.PLM StartPos   # seulement les entités qui correspondent
+perl tools/plm.pl subs FICHIER.PLM            # sous-niveaux (tuiles, circuits, météos)
 ```
 
-Affiche l'en-tête (magic, version, drapeau, 9 flottants, 16 entiers) puis toutes les
-chaînes de la table. Pratique avec `grep` :
+Le filtre est une expression régulière, insensible à la casse, appliquée au chemin de
+l'entité et à tout son contenu (classes, propriétés, valeurs). Chaque entité est
+affichée avec son identifiant `[#xxxxxxxx]`.
+
+Modifier (écrit toujours dans un nouveau fichier) :
 
 ```
-perl tools/plmstr.pl X.PLM | grep '::'        # classes de composants
-perl tools/plmstr.pl X.PLM | grep ':/'        # ressources référencées
+perl tools/plm.pl set ENTREE.PLM SORTIE.PLM \
+    'RaceInitializer:NbLaps=3' \
+    'StartingGrid01a_1:Mesh.MaxVisibleDistance=275' \
+    'StartingGrid:pos=9775.84,4472.44,165'
 ```
 
-Voir [formats/plm.md](formats/plm.md).
+- `ENTITE:Propriete=valeur` change une propriété ; ajouter `Classe.` devant la
+  propriété si plusieurs composants de l'entité ont une propriété du même nom.
+- `ENTITE:pos=x,y,z`, `rot=x,y,z`, `scale=x,y,z` changent la transformation.
+- `ENTITE` est le nom de l'entité, ou `#identifiant` quand le nom n'est pas unique
+  (l'outil le signale et liste les identifiants possibles).
+
+L'outil affiche l'ancienne et la nouvelle valeur de chaque modification. Limites :
+pas d'ajout ni de suppression d'entité, pas de modification des tableaux (points de
+spline). Voir [formats/plm.md](formats/plm.md).
+
+## `plmstr.pl` — chaînes brutes d'un PLM
+
+```
+perl tools/plmstr.pl FICHIER.PLM
+```
+
+Affiche l'en-tête et toutes les chaînes de la table, sans structure. Remplacé par
+`plm.pl` pour l'usage courant.
 
 ## Outils qui manquent
 
-- lecteur / éditeur complet de PLM ;
+- ajout d'entités et édition des tableaux dans les PLM ;
 - décodeur de PWS ;
 - réécriture de PKG.

@@ -1,2 +1,18 @@
+# Fichiers du jeu (copie personnelle, jamais versionnee)
 TT3/
+
+# Fichiers extraits des PKG
+out/
+
+# Exports de code decompile
+exported/
+
+# Projet Ghidra (base de 500 Mo, contient l'exe analyse)
 openKT.rep/
+openKT.lock
+openKT.lock~
+*.gzf
+
+# Configs du jeu dechiffrees
+DUMMY*.lua
+DUMMY*.DAT

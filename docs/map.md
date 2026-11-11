@@ -72,9 +72,15 @@ triggers, décalques de grille, arche de départ, bannières et panneaux.
 
 ## 3. La scène principale — `IOM_SNAEFELL.PLM`
 
-4,9 Mo. Dimensions dans l'en-tête : origine `-16384, -16384`, puis `2048` répété, ce
-qui suggère un monde de 32 768 unités de côté découpé en cases de 2 048 (1 unité =
-1 mètre d'après `Engine.UnitScale`). **Interprétation à confirmer.**
+4,9 Mo, 24 581 entités. Bornes dans l'en-tête : `-16384, -16384`, puis `2048` répété.
+Le fichier liste ses 148 sous-niveaux avec leur position : une tuile `TILE_Xnn_Ymm`
+est placée en `((nn - 16) × 1024, (mm - 16) × 1024)`, et les tuiles font donc
+2 048 unités de côté (1 unité = 1 mètre d'après `Engine.UnitScale`). Les circuits et
+météos sont tous en `(0, 0, 0)`.
+
+```
+perl tools/plm.pl subs out/WIN32/LEVELS/IOM_SNAEFELL/IOM_SNAEFELL.PLM
+```
 
 Contient le terrain (composant `HeightmapComponent` avec `Resolution = 4096`,
 distances de fondu, et la liste des couches `TerrainLayerComponent`), le `TileSpawner`,

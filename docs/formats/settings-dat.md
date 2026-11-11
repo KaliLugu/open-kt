@@ -26,6 +26,14 @@ fonction chiffre et déchiffre. Aucune somme de contrôle n'a été vue dans cet
 Vérifié : déchiffrer puis rechiffrer `DUMMYS.DAT` redonne le fichier d'origine à
 l'octet près. Outil : `tools/settings_crypt.pl`.
 
+**Testé en jeu** : un `DUMMYS.DAT` déchiffré, modifié puis rechiffré est accepté par
+le jeu et les changements sont pris en compte. Il n'y a donc pas de contrôle
+d'intégrité sur ce fichier, et sa taille peut changer.
+
+Les trois fichiers utilisent la même clé. Les autres `DUMMY.DAT` de l'installation
+(2 octets, `6e 74`) ne sont pas des fichiers chiffrés mais de simples marqueurs de
+dossier.
+
 ## DUMMYS.DAT — table `Engine`
 
 Extraits utiles (numéros de ligne du fichier déchiffré) :

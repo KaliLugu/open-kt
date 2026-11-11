@@ -12,14 +12,15 @@ ainsi que quelques scripts pour extraire et inspecter les données.
 ## Où en est le projet
 
 C'est un travail en cours. Pour l'instant, tout repose sur de l'analyse statique
-(fichiers du jeu et décompilation Ghidra) : **rien n'a encore été testé en jeu**.
+(fichiers du jeu et décompilation Ghidra). Seule la modification de la config
+chiffrée a été **testée en jeu** pour l'instant.
 
 | Sujet | État |
 |---|---|
 | Archives `.PKG` | format compris, extraction fonctionnelle |
-| Configs chiffrées `DUMMY*.DAT` | déchiffrement et rechiffrement fonctionnels |
+| Configs chiffrées `DUMMY*.DAT` | déchiffrement et rechiffrement fonctionnels, modification testée en jeu |
 | Chargement d'un fichier modifié | méthode trouvée dans le code, à valider en jeu |
-| Scènes `.PLM` | en-tête et table de chaînes seulement |
+| Scènes `.PLM` | format décodé, lecture et modification de valeurs possibles, à valider en jeu |
 | Terrain `.PWS` | on sait que ce sont des flux zlib, pas plus |
 | Modèles, textures, routes (`.P3D`, `.PTX`, `.PRO`…) | pas encore regardés |
 
@@ -66,7 +67,6 @@ perl tools/settings_crypt.pl TT3/Common/Settings/DUMMYS.DAT DUMMYS.lua
 - [moteur/vfs.md](moteur/vfs.md) — système de fichiers virtuel (`DATA:/`, `COMMON:/`, PKG)
 - [moteur/lua.md](moteur/lua.md) — Lua (LuaPlus) et les bases de données du jeu
 - [moteur/code-decompile.md](moteur/code-decompile.md) — se repérer dans le code décompilé
-- [fonction/](fonction/) — notes sur des fonctions précises
 
 **Les outils**
 - [outils.md](outils.md) — mode d'emploi des scripts de `tools/`
@@ -83,7 +83,7 @@ adresse, qu'on retrouve directement dans Ghidra.
 Les corrections et les découvertes sont les bienvenues, en particulier :
 
 - un retour de test en jeu sur les méthodes de [modding.md](modding.md) ;
-- le décodage de la partie binaire des `.PLM` ;
+- un retour de test en jeu sur un `.PLM` modifié avec `tools/plm.pl` ;
 - le décodage des `.PWS`.
 
 Merci d'indiquer comment une information a été obtenue (lue dans le code, observée
