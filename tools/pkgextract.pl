@@ -3,7 +3,8 @@
 # usage: pkgextract.pl FILE.PKG OUTDIR [regex_nom]
 # Format: "PPKG" u32 ver u32 count u32 index_size, pad -> 0x30, puis entrees:
 #   u32 namelen, name, u32 crc, u64 offset, u64 filetime, u64 csize, u64 usize, u32 comp, 8o hash, 32o zero
-# Donnees: comp=2 -> "PKGB" + frame LZ4 ; comp=0 -> brut
+# Donnees: "PKGB" + (comp=2: frame LZ4 | comp=0: brut) + "PKGE"
+#   derniers champs de l'entree: crc32 des donnees stockees, crc32 des donnees decompressees
 use strict; use warnings;
 my ($f, $out, $re) = @ARGV; die "usage: $0 file.pkg outdir [regex]\n" unless $out;
 open(my $fh, '<:raw', $f) or die "$f: $!";
@@ -15,21 +16,28 @@ my $p = 0; my $n = 0;
 for my $i (1..$count) {
     my $nl = unpack('V', substr($idx, $p, 4)); $p += 4;
     my $name = substr($idx, $p, $nl); $p += $nl;
-    my ($crc, $off, $ft, $csz, $usz, $comp) = unpack('V Q< Q< Q< Q< V', substr($idx, $p, 40)); $p += 80;
+    my ($crc, $off, $ft, $csz, $usz, $comp, $c1, $c2) = unpack('V Q< Q< Q< Q< V V V', substr($idx, $p, 48)); $p += 80;
     next if defined $re && $name !~ /$re/i;
     seek($fh, $off, 0); read($fh, my $d, $csz + 8);
     my $data;
     if ($comp == 2) {
         die "$name: pas de PKGB\n" unless substr($d, 0, 4) eq 'PKGB';
         $data = lz4frame(substr($d, 4));
-    } else { $data = substr($d, 0, $usz); }
+    } else { $data = substr($d, 4, $usz); }
     warn sprintf("%s: taille %d != %d\n", $name, length($data), $usz) if length($data) != $usz;
+    warn "$name: CRC incorrect\n" if crc32($data) != $c2;
     (my $path = "$out/$name") =~ s{\\}{/}g;
     (my $dir = $path) =~ s{/[^/]*$}{};
     system('mkdir', '-p', $dir) unless -d $dir;
     open(my $o, '>:raw', $path) or die "$path: $!"; print $o $data; close $o; $n++;
 }
 print STDERR "$n fichiers extraits\n";
+
+my @crct;
+sub crc32 {
+    @crct = map { my $c = $_; $c = ($c & 1) ? (0xEDB88320 ^ ($c >> 1)) : ($c >> 1) for 1..8; $c } 0..255 unless @crct;
+    my $c = 0xFFFFFFFF; $c = $crct[($c ^ $_) & 255] ^ ($c >> 8) for unpack('C*', $_[0]); $c ^ 0xFFFFFFFF
+}
 
 sub lz4frame {
     my ($s) = @_;
