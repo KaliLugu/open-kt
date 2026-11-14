@@ -12,23 +12,28 @@ ainsi que quelques scripts pour extraire et inspecter les données.
 ## Où en est le projet
 
 C'est un travail en cours. Pour l'instant, tout repose sur de l'analyse statique
-(fichiers du jeu et décompilation Ghidra). Seule la modification de la config
-chiffrée a été **testée en jeu** pour l'instant.
+(fichiers du jeu et décompilation Ghidra). Ont été **testés en jeu** : la modification de la config chiffrée, le remplacement
+d'un fichier d'un PKG par une version en vrac, une texture et un modèle 3D retouchés.
 
 | Sujet | État |
 |---|---|
 | Archives `.PKG` | format compris, extraction fonctionnelle |
 | Configs chiffrées `DUMMY*.DAT` | déchiffrement et rechiffrement fonctionnels, modification testée en jeu |
-| Chargement d'un fichier modifié | méthode trouvée dans le code, à valider en jeu |
-| Scènes `.PLM` | format décodé, lecture et modification de valeurs possibles, à valider en jeu |
+| Chargement d'un fichier modifié | masquage dans le PKG + fichier en vrac, testé en jeu |
+| Scènes `.PLM` | format décodé, modification de valeurs et de positions testée en jeu |
 | Terrain `.PWS` | on sait que ce sont des flux zlib, pas plus |
-| Modèles, textures, routes (`.P3D`, `.PTX`, `.PRO`…) | pas encore regardés |
+| Modèles 3D `.P3D` | géométrie exportée en OBJ, retouche des sommets testée en jeu |
+| Textures `.PTX` | conteneur compris (DXT1/DXT5), remplacement par une couleur unie testé en jeu |
+| Motos (`.DYN`, `.TYR`, `.PPF`, bases Lua) | fichiers texte localisés et décrits, modification pas encore testée en jeu |
+| Routes (`.PRM`) | géométrie visible comprise, collision PhysX pas encore |
+| Décor généré (`.PRO`) | pas encore regardé |
 
 Chaque page de la doc précise ce qui est vérifié et ce qui n'est qu'une hypothèse.
 
 ## Par où commencer
 
 - Pour comprendre comment la map est organisée : [map.md](map.md)
+- Pour trouver les réglages des motos : [motos.md](motos.md)
 - Pour essayer de modifier quelque chose : [modding.md](modding.md)
 - Pour extraire les fichiers du jeu : [outils.md](outils.md)
 
@@ -53,6 +58,7 @@ perl tools/settings_crypt.pl TT3/Common/Settings/DUMMYS.DAT DUMMYS.lua
 **Le jeu**
 - [arborescence.md](arborescence.md) — ce qu'on trouve dans le dossier d'installation
 - [map.md](map.md) — circuits, tuiles, terrain, météo : qui contient quoi
+- [motos.md](motos.md) — réglages des motos : physique, pneus, pièces
 - [modding.md](modding.md) — faire charger un fichier modifié par le jeu
 
 **Les formats**
@@ -60,6 +66,7 @@ perl tools/settings_crypt.pl TT3/Common/Settings/DUMMYS.DAT DUMMYS.lua
 - [formats/paclog.md](formats/paclog.md) — listes de ressources `.PACLOG`
 - [formats/plm.md](formats/plm.md) — scènes et niveaux `.PLM`
 - [formats/pws.md](formats/pws.md) — terrain streamé `.PWS`
+- [formats/p3d.md](formats/p3d.md) — modèles 3D `.P3D`, `.PSI`, `.PMA`
 - [formats/settings-dat.md](formats/settings-dat.md) — configs chiffrées `DUMMY*.DAT`
 - [formats/extensions.md](formats/extensions.md) — toutes les extensions rencontrées
 
@@ -82,8 +89,6 @@ adresse, qu'on retrouve directement dans Ghidra.
 
 Les corrections et les découvertes sont les bienvenues, en particulier :
 
-- un retour de test en jeu sur les méthodes de [modding.md](modding.md) ;
-- un retour de test en jeu sur un `.PLM` modifié avec `tools/plm.pl` ;
 - le décodage des `.PWS`.
 
 Merci d'indiquer comment une information a été obtenue (lue dans le code, observée

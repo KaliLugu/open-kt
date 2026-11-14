@@ -1,7 +1,9 @@
 # Faire charger un fichier modifié
 
-**Aucune de ces méthodes n'a été testée en jeu.** Elles découlent de la lecture du
-code (voir [moteur/vfs.md](moteur/vfs.md)). Faire une sauvegarde avant toute écriture
+**La méthode 1 a été testée en jeu** (sous Proton) : une texture `.PTX` et un modèle `.P3D`
+masqués dans le PKG puis remplacés par des versions en vrac modifiées sont bien chargés.
+Les méthodes 2 et 3 découlent seulement de la lecture du code
+(voir [moteur/vfs.md](moteur/vfs.md)). Faire une sauvegarde avant toute écriture
 dans `TT3/`.
 
 Rappel du principe : le moteur cherche un fichier d'abord dans les PKG (par nom), puis
@@ -35,8 +37,8 @@ Points à surveiller :
 - Casse des dossiers : les noms des PKG sont en majuscules (`COMMON`), le dossier
   existant s'appelle `Common`. Sans importance sous Windows ; sous Linux/Proton,
   fusionner dans le dossier existant.
-- Si le jeu refuse de démarrer, soupçonner un contrôle d'intégrité des PKG (champs
-  CRC/hash de l'index dont le rôle n'est pas établi) ou Steam qui répare les fichiers.
+- Aucun contrôle d'intégrité ne s'est déclenché : le jeu démarre avec quatre entrées
+  masquées. Steam peut en revanche réparer les fichiers lors d'une vérification.
 
 ## Méthode 2 — désactiver les PKG
 
@@ -62,16 +64,28 @@ compression `0` (brut) éviterait d'avoir à compresser en LZ4. Non réalisé : 
 méthode 1 donne le même résultat sans risque sur les offsets, et le rôle des champs
 CRC/hash n'est pas connu.
 
-## Premier essai conseillé
+## Essai réalisé
 
-Valider la chaîne avec le changement le plus simple et le plus visible :
+Test fait sur les drapeaux de départ et d'arrivée des courses (`BANNER_FULL`) :
 
-1. méthode 1 sur `COMMON\DATABASE\TRACKS.LUA` ;
-2. changer `LengthKm` ou `Order` d'un circuit ;
-3. lancer le jeu et regarder l'écran de sélection des circuits.
+1. méthode 1 sur `WIN32\GRAPH\TRACKS\COMMON\SPONSORS\TEXTURES\BRANDFLAG01A_D.PTX`,
+   remplacée par une texture magenta unie (`tools/ptxfill.pl`) ;
+2. méthode 1 sur `WIN32\GRAPH\PROPS\FLAGS\MESH\BANNER_FULL.P3D`, agrandi deux fois
+   (`tools/p3dpatch.pl --scale 2,2,2`).
 
-Si la valeur change, la méthode fonctionne pour tous les fichiers des PKG. Ensuite
-seulement, passer aux PLM (voir [formats/plm.md](formats/plm.md)).
+Résultat en jeu : drapeaux magenta et deux fois plus grands. Le chargement en vrac
+fonctionne donc pour les fichiers de `WIN32`, et un P3D dont seules les positions de
+sommets ont changé est accepté, y compris sur un objet animé par le vent.
+
+`COMMON\DATABASE\TRACKS.LUA` était masqué en même temps et le jeu démarre normalement,
+mais l'effet de la valeur modifiée n'a pas été observé.
+
+Les PLM aussi : les 32 PLM de circuit réécrits avec `tools/plm.pl` (drapeaux relevés de
+10 m) sont chargés en vrac, et les drapeaux flottent bien en jeu.
+
+Attention : une entrée masquée dont le fichier en vrac manque fait planter le jeu au
+moment où il en a besoin. `tools/modsync.pl` évite ce cas quand on travaille sur une
+copie différente de celle qu'on lance.
 
 ## Cas des `.PWS`
 

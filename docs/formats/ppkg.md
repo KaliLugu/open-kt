@@ -29,13 +29,14 @@ L'index commence à 0x30. Les données commencent à `0x30 + taille de l'index`.
 |---|---|
 | u32 | longueur du nom |
 | char[n] | nom, majuscules, séparateur `\`, sans zéro final (ex. `COMMON\TUNING\PHYSIC.LUA`) |
-| u32 | valeur de type CRC/hash (rôle non déterminé) |
+| u32 | valeur de hachage, rôle non déterminé (probablement liée au nom) |
 | u64 | offset absolu des données dans l'archive |
 | u64 | date au format FILETIME Windows |
 | u64 | taille compressée |
 | u64 | taille décompressée |
 | u32 | mode de compression : `2` = LZ4, `0` = brut |
-| 8 octets | hash (rôle non déterminé) |
+| u32 | CRC32 des données stockées (entre `PKGB` et `PKGE`) |
+| u32 | CRC32 des données décompressées |
 | 32 octets | zéros |
 
 Soit `4 + n + 80` octets par entrée.
@@ -44,18 +45,21 @@ Sur les 21 758 entrées, 21 693 sont en mode 2 et 65 en mode 0.
 
 ## Données d'un fichier
 
-Mode 2 :
-
 ```
 "PKGB"                     4 octets
-frame LZ4 standard         magic 04 22 4D 18, puis blocs
+données stockées           `taille compressée` octets
+"PKGE"                     4 octets
 ```
 
-La taille compressée de l'index ne compte pas tout : deux entrées consécutives sont
-espacées de `taille compressée + 8` octets. Les outils lisent donc `csize + 8` octets.
+Les données stockées sont une frame LZ4 standard (magic `04 22 4D 18`) en mode 2, ou
+le fichier tel quel en mode 0. Les 8 octets des deux marqueurs ne sont pas comptés
+dans la taille compressée.
 
-Mode 0 : les données brutes, sur `taille décompressée` octets (déduit, non vérifié
-finement : aucun des fichiers extraits n'était en mode 0).
+Les deux CRC32 sont le CRC standard (celui de zlib). Vérifié : le CRC des données
+stockées correspond sur 300 entrées, et `pkgextract.pl` contrôle celui des données
+décompressées à chaque extraction.
+
+Le mode 0 sert pour 65 petits fichiers (`.PMC`, `.PMA`, `.LUA`, `.CFG`…).
 
 ## Recherche d'un fichier par le moteur
 
@@ -67,8 +71,10 @@ d'un nom dans l'index rend l'entrée introuvable (voir [../modding.md](../moddin
 
 ## Points ouverts
 
-- Rôle exact du u32 et du hash de 8 octets (contrôle d'intégrité à la lecture ?).
-- Contenu des 8 octets supplémentaires par fichier.
+- Rôle du premier u32 de l'entrée. Ce n'est ni un CRC32, ni un Adler32, ni un FNV du nom
+  ou des données sous les formes essayées.
+- Le moteur vérifie-t-il les CRC à la lecture ? (Modifier l'index pour masquer une entrée
+  ne déclenche en tout cas aucun contrôle : testé en jeu.)
 - Le code référence `DATA:/PKG/CHUNK_%d/CHUNK_%d.PKG`, alors que les fichiers
   s'appellent `CHUNK_0_PART000n.PKG` : le montage liste en fait le dossier
   `DATA:/PKG/CHUNK_0` et monte tout ce qu'il y trouve (`GameEngine::MountPkgs`).

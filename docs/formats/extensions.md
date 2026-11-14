@@ -8,23 +8,23 @@ l'emplacement et des références dans les PLM, sauf mention « vérifié ».
 | Ext. | Nombre | Nature |
 |---|---|---|
 | `PTX` | 7 217 | texture |
-| `PRM` | 6 848 | non identifié (lié aux tuiles / routes) |
-| `PMA` | 2 035 | matériau |
-| `PSI` | 1 545 | objet de scène instanciable (référencé par `Mesh.ResourceID`) |
+| `PRM` | 6 848 | géométrie générée par tuile : routes, carrefours, objets le long des splines (4,4 Go) |
+| `PMA` | 2 035 | matériau (effet, paramètres, textures) — vérifié |
+| `PSI` | 1 545 | objet posable : un `.P3D` + ses matériaux — vérifié, voir [p3d.md](p3d.md) |
 | `PRO` | 1 375 | géométrie procédurale précalculée (routes, murs, talus, trottoirs par tuile) |
-| `P3D` | 1 277 | maillage 3D |
+| `P3D` | 1 277 | maillage 3D (RIFF) — vérifié, voir [p3d.md](p3d.md) |
 | `CFG` | 262 | config de tuning |
 | `PAN` | 204 | animation |
 | `PFX` | 169 | effet / shader |
 | `PLM` | 150 | scène — vérifié, voir [plm.md](plm.md) |
-| `PPF` | 107 | archétype / prefab (`ARCHETYPES:/...`) |
+| `PPF` | 107 | archétype / prefab (`ARCHETYPES:/...`), XML — vérifié pour les motos, voir [../motos.md](../motos.md) |
 | `SSB` | 96 | non identifié |
 | `LUA` | 74 | script Lua en texte clair — vérifié |
 | `UIML` | 54 | page d'interface |
-| `TYR` | 52 | réglage de pneu |
+| `TYR` | 52 | réglage de pneu, XML — vérifié, voir [../motos.md](../motos.md) |
 | `PSK` | 49 | atlas de textures d'interface |
 | `XML` | 47 | machines à états, post-process, animations d'UI |
-| `DYN` | 42 | dynamique de moto |
+| `DYN` | 42 | dynamique de moto et base des pneus, XML — vérifié, voir [../motos.md](../motos.md) |
 | `PST` | 26 | végétation (SpeedTree) |
 | `PMC` | 26 | matériau physique |
 | `PKFX` | 24 | effet de particules (PopcornFX) |

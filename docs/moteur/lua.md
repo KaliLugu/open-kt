@@ -42,6 +42,9 @@ Tous les `.LUA` des PKG sont en **texte source**, pas en bytecode.
 | `POIS.LUA` | 97 Ko | points d'intérêt de la carte |
 | `TRACKS.LUA` | 55 Ko | circuits |
 
+Liés aux motos : `BIKES.LUA`, `BIKECONFIGS.LUA`, `BIKETEMPLATES.LUA`, `COMPONENTS.LUA`,
+`COMPONENTPROPERTIES.LUA`. Détail dans [../motos.md](../motos.md).
+
 Liés à la map : `TRACKS.LUA`, `TRACKGROUPS.LUA`, `TRACKASPHALTCONSUMPTIONS.LUA`,
 `WEATHERTRACKBINDS.LUA`, `WEATHERCONDITIONS.LUA`, `ASPHALTCONDITIONS.LUA`,
 `POIS.LUA`, `POITYPES.LUA`. Détail de `TRACKS.LUA` dans [../map.md](../map.md).

@@ -44,7 +44,7 @@ perl tools/pkghide.pl FICHIER.PKG 'COMMON\DATABASE\TRACKS.LUA' --restore
 
 Remplace le premier caractère du nom par `#` dans l'index (un octet écrit sur place).
 Accepte `/` ou `\` et n'importe quelle casse. **Modifie le PKG** : voir
-[modding.md](modding.md). Testé sur une copie de l'index seulement, restauration
+[modding.md](modding.md). Testé en jeu ; restauration
 identique à l'octet.
 
 ## `settings_crypt.pl` — chiffrer / déchiffrer les `DUMMY*.DAT`
@@ -90,6 +90,80 @@ L'outil affiche l'ancienne et la nouvelle valeur de chaque modification. Limites
 pas d'ajout ni de suppression d'entité, pas de modification des tableaux (points de
 spline). Voir [formats/plm.md](formats/plm.md).
 
+## `p3d2obj.pl` — exporter un modèle 3D en OBJ
+
+```
+perl tools/p3d2obj.pl MODELE.P3D               # liste les parties, sommets et triangles
+perl tools/p3d2obj.pl MODELE.P3D SORTIE.OBJ    # exporte positions, UV et triangles
+perl tools/p3d2obj.pl --terrain DOSSIER ILE.OBJ   # assemble le relief de toute l'île
+```
+
+Chaque sous-maillage devient un objet OBJ nommé d'après son nœud ; les niveaux de
+détail (`_LOD1`, `_LOD2`…) sont exportés comme des objets séparés. Repère du jeu :
+Z vers le haut, en mètres. Normales et matériaux ne sont pas exportés.
+
+Le mode `--terrain` prend le dossier des `HEIGHTMAP_xx_yy.P3D` extraits et place
+chaque morceau à sa position dans le monde. Voir [formats/p3d.md](formats/p3d.md).
+
+## `p3dpatch.pl` — retoucher un modèle 3D
+
+Modifie uniquement la position des sommets d'un P3D ; tout le reste du fichier est
+conservé à l'identique.
+
+```
+perl tools/p3dpatch.pl ENTREE.P3D SORTIE.P3D --scale 1,1,2.5          # étirer (ici 2,5× en hauteur)
+perl tools/p3dpatch.pl ENTREE.P3D SORTIE.P3D --move 0,0,1             # déplacer
+perl tools/p3dpatch.pl ENTREE.P3D SORTIE.P3D --scale 1,1,3 --part LOD0   # une seule partie
+perl tools/p3dpatch.pl ENTREE.P3D SORTIE.P3D --obj MODIFIE.OBJ        # depuis un logiciel 3D
+```
+
+Avec `--obj`, le fichier doit venir de `p3d2obj.pl` et avoir été modifié sans ajouter
+ni supprimer de sommet, ni changer leur ordre : on déplace des points, c'est tout.
+Dans Blender, garder les mêmes réglages d'axes à l'import et à l'export. Les parties
+sont retrouvées par leur nom d'objet. Un aller-retour P3D → OBJ → P3D sans modification
+redonne exactement les mêmes positions.
+
+L'outil recalcule la boîte et la sphère englobantes de chaque maillage. Il ne met pas
+à jour les normales (l'éclairage reste celui de l'ancienne forme) ni la collision.
+
+## `ptxfill.pl` — colorer une texture pour un test
+
+```
+perl tools/ptxfill.pl ENTREE.PTX SORTIE.PTX ff00ff
+```
+
+Remplit une texture DXT1 d'une couleur unie (magenta par défaut), mipmaps compris.
+Sert à rendre un objet immédiatement reconnaissable en jeu. Les `.PTX` sont des RIFF
+`PATX` : un bloc `Pixl` par niveau de mipmap, en DXT1 ou DXT5.
+
+## `prmpatch.pl` — déplacer une route
+
+```
+perl tools/prmpatch.pl ROUTE.PRM                              # maillages, niveaux de détail, collision
+perl tools/prmpatch.pl ROUTE.PRM SORTIE.PRM --move 0,0,0.5    # relever de 50 cm
+```
+
+Les `.PRM` de `ROADBUILDSTEP` sont des RIFF `PA__` de type `PROAD` : sommets en
+coordonnées du monde, trois niveaux de détail, et un bloc `Phys` (collision PhysX).
+L'outil déplace les deux ensemble ; `--visual` laisse la collision en place.
+
+Bloc `Phys` : u32 nombre de maillages, puis pour chacun un u32 « présent » suivi, s'il
+vaut 1, d'un u32 taille, d'un maillage PhysX cuit (`NXS MESH` version 14, arbre `RTRE`
+en gros-boutiste) et du chemin du matériau physique (`.PMC`). Décodage vérifié sur les
+461 routes, carrefours et ronds-points.
+
+## `modsync.pl` — reporter les modifications vers l'instance lancée
+
+```
+perl tools/modsync.pl TT3 /chemin/instance --dry    # montre ce qui serait fait
+perl tools/modsync.pl TT3 /chemin/instance
+```
+
+Pour chaque entrée masquée dans les PKG de la copie source : copie le fichier en vrac
+vers l'instance et masque la même entrée dans ses PKG (sans recopier les archives).
+Une entrée masquée seulement dans l'instance est restaurée. Une entrée n'est jamais
+masquée si son fichier en vrac manque, car le jeu plante dans ce cas.
+
 ## `plmstr.pl` — chaînes brutes d'un PLM
 
 ```
@@ -103,4 +177,5 @@ Affiche l'en-tête et toutes les chaînes de la table, sans structure. Remplacé
 
 - ajout d'entités et édition des tableaux dans les PLM ;
 - décodeur de PWS ;
+- modification libre de la forme des routes (reconstruction de l'arbre de collision), lecteur des `.PRO` ;
 - réécriture de PKG.
